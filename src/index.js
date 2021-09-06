@@ -25,14 +25,15 @@ function checksExistsUserAccount(request, response, next) {
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request.user;
 
-  if (((!user.pro)&&(user.todos.length >=10)) || (user.pro===true)){
-    return next()
-  }
 
-  if ((!user.pro) && (user.todos.length === 10)) {
-
+  if ((user.pro !== true) && (user.todos.length < 10)) {
     return response.status(403).json({error: "finalizou período Gratúito "});
   }
+
+  if (((user.pro !== true) && (user.todos.length === 10)) || (user.pro === true)){    
+    return next();
+  }
+
 }
 
 function checksTodoExists(request, response, next) {
@@ -42,7 +43,7 @@ function checksTodoExists(request, response, next) {
 
   const userExists = users.find((u)=> u.username === username);
 
-  if(userExists) {
+  if(!userExists) {
     return response.status(404).json(userExists);
   }
 
@@ -58,8 +59,9 @@ function checksTodoExists(request, response, next) {
      return response.status(404).json({ error: 'Todo not Exists '});
   }
 
-  request.user= userExists;
+  request.user = userExists;
   request.todo = todo;
+
   return next();
 
 }
@@ -68,12 +70,14 @@ function findUserById(request, response, next) {
 
   const { id } = request.params;
   
-  const userExists = users.some((u) => u.id === id);
+  const userExists = users.find((u) => u.id === id);
   
   if(!userExists){
     return response.status(404).json({error: 'User not found'});
   }
-
+  
+  request.user= userExists;
+  return next();
 }
 
 app.post('/users', (request, response) => {
