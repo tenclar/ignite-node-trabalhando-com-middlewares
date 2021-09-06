@@ -11,7 +11,7 @@ const users = [];
 
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
-  const user = users.find((u)  => u.username = username);
+  const user = users.find((u)  => u.username === username);
 
   if(!user){
     return response.status(404).json({ error: 'Usuário não Existe' });
@@ -25,17 +25,17 @@ function checksExistsUserAccount(request, response, next) {
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
   
-  const todoLimit = user.todos.length === 10 ? true : false;
+  const todoLimit = user.todos.length >= 10 ? true : false;
  
-   
+  if (!user.pro && todoLimit) {
+    return response.status(403).json({error: "finalizou período Gratúito "});
+  }
 
   if ((user.pro) || (!user.pro && !todoLimit)){    
     return next();
   }
 
-  if (!user.pro && todoLimit) {
-    return response.status(403).json({error: "finalizou período Gratúito "});
-  }
+ return next();
 
 
 }
